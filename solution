@@ -1,0 +1,53 @@
+from sortedcontainers import SortedList
+
+class Solution:
+    def check(self, tasks, workers, pills, strength, mid):
+        pillsUsed = 0
+
+        # best mid workers
+        st = SortedList(workers[:mid])
+
+        for i in range(mid - 1, -1, -1):
+            reqrd = tasks[i]
+
+            # strongest worker
+            if st[-1] >= reqrd:
+                st.pop()
+
+            elif pillsUsed >= pills:
+                return False
+
+            else:
+                # weakest worker who can do task after pill
+                idx = st.bisect_left(reqrd - strength)
+
+                if idx == len(st):
+                    return False
+
+                st.pop(idx)
+                pillsUsed += 1
+
+        return True
+
+    def maxTaskAssign(self, tasks, workers, pills, strength):
+        m = len(tasks)
+        n = len(workers)
+
+        tasks.sort()
+        workers.sort(reverse=True)
+
+        l = 0
+        r = min(m, n)
+
+        result = 0
+
+        while l <= r:
+            mid = l + (r - l) // 2
+
+            if self.check(tasks, workers, pills, strength, mid):
+                result = mid
+                l = mid + 1
+            else:
+                r = mid - 1
+
+        return result
